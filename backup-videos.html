@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Backup Video Messages (Owner Only)</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .video-list { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 32px; }
+    .video-item { background: #101828; border-radius: 12px; box-shadow: 0 2px 16px #00aaff44; padding: 18px; width: 340px; }
+    .video-item video { width: 100%; border-radius: 8px; }
+    .video-item .filename { margin-top: 8px; word-break: break-all; color: #ff003c; }
+  </style>
+</head>
+<body>
+  <div id="passwordModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;">
+    <div style="background:#222;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;text-align:center;">
+      <h2 style="color:#fff;">Admin Access</h2>
+      <input id="adminPasswordInput" type="password" placeholder="Enter password" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;" />
+      <button id="adminPasswordBtn" style="margin-left:12px;padding:8px 18px;border-radius:6px;background:#00aaff;color:#fff;border:none;font-size:1.1em;">Enter</button>
+      <div id="adminPasswordError" style="color:#ff003c;margin-top:12px;display:none;">Wrong password. Try again.</div>
+      <div style="margin-top:16px;">
+        <a href="#" id="forgotPasswordLink" style="color:#00aaff;text-decoration:underline;font-size:0.98em;">Forgot Password?</a>
+      </div>
+    </div>
+  </div>
+  <div id="forgotPasswordModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:10000;align-items:center;justify-content:center;">
+    <div style="background:#222;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;text-align:center;max-width:350px;margin:auto;">
+      <h2 style="color:#fff;">Password Hint</h2>
+      <div id="passwordHintText" style="color:#fff;margin:16px 0;">Your hint: <b id='hintValue'></b></div>
+      <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="padding:8px 18px;border-radius:6px;background:#00aaff;color:#fff;border:none;font-size:1.1em;">Close</button>
+    </div>
+  </div>
+  <div id="changePasswordModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:10000;align-items:center;justify-content:center;">
+    <div style="background:#222;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;text-align:center;max-width:350px;margin:auto;">
+      <h2 style="color:#fff;">Change Password</h2>
+      <input id="newPasswordInput" type="password" placeholder="New password" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;margin-bottom:8px;" /><br>
+      <input id="confirmPasswordInput" type="password" placeholder="Confirm new password" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;" /><br>
+      <input id="passwordHintInput" type="text" placeholder="Password hint (optional)" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;margin-top:8px;" /><br>
+      <button id="savePasswordBtn" style="margin-top:12px;padding:8px 18px;border-radius:6px;background:#00aaff;color:#fff;border:none;font-size:1.1em;">Save</button>
+      <div id="changePasswordError" style="color:#ff003c;margin-top:12px;display:none;"></div>
+      <button onclick="document.getElementById('changePasswordModal').style.display='none'" style="margin-top:12px;padding:8px 18px;border-radius:6px;background:#333;color:#fff;border:none;font-size:1.1em;">Cancel</button>
+    </div>
+  </div>
+  <button id="changePasswordBtn" style="display:none;position:fixed;top:16px;right:16px;z-index:100;">Change Password</button>
+  <h1 style="color:var(--hud-red);text-align:center;margin-top:32px;">Backup Video Messages (Owner Only)</h1>
+  <div id="videoList" class="video-list"></div>
+  <script>
+    // Password protection logic with localStorage
+    function getStoredPassword() {
+      return localStorage.getItem('remay_admin_pw') || 'remayadmin2024';
+    }
+    function getStoredHint() {
+      return localStorage.getItem('remay_admin_hint') || 'Default: remayadmin2024';
+    }
+    function setStoredPassword(pw, hint) {
+      localStorage.setItem('remay_admin_pw', pw);
+      if (hint !== undefined) localStorage.setItem('remay_admin_hint', hint);
+    }
+    let PASSWORD = getStoredPassword();
+    const passwordModal = document.getElementById('passwordModal');
+    const adminPasswordInput = document.getElementById('adminPasswordInput');
+    const adminPasswordBtn = document.getElementById('adminPasswordBtn');
+    const adminPasswordError = document.getElementById('adminPasswordError');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    const passwordHintText = document.getElementById('passwordHintText');
+    const hintValue = document.getElementById('hintValue');
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const changePasswordModal = document.getElementById('changePasswordModal');
+    const newPasswordInput = document.getElementById('newPasswordInput');
+    const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+    const passwordHintInput = document.getElementById('passwordHintInput');
+    const savePasswordBtn = document.getElementById('savePasswordBtn');
+    const changePasswordError = document.getElementById('changePasswordError');
+    function unlockAdminPage() {
+      passwordModal.style.display = 'none';
+      document.body.style.overflow = '';
+      changePasswordBtn.style.display = 'block';
+    }
+    adminPasswordBtn.onclick = function() {
+      PASSWORD = getStoredPassword();
+      if (adminPasswordInput.value === PASSWORD) {
+        unlockAdminPage();
+      } else {
+        adminPasswordError.style.display = 'block';
+        adminPasswordInput.value = '';
+      }
+    };
+    adminPasswordInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') adminPasswordBtn.click();
+    });
+    // Prevent scrolling and interaction until unlocked
+    document.body.style.overflow = 'hidden';
+    // Forgot password logic
+    forgotPasswordLink.onclick = function(e) {
+      e.preventDefault();
+      hintValue.textContent = getStoredHint();
+      forgotPasswordModal.style.display = 'flex';
+    };
+    // Change password logic
+    changePasswordBtn.onclick = function() {
+      newPasswordInput.value = '';
+      confirmPasswordInput.value = '';
+      passwordHintInput.value = getStoredHint();
+      changePasswordError.style.display = 'none';
+      changePasswordModal.style.display = 'flex';
+    };
+    savePasswordBtn.onclick = function() {
+      const newPw = newPasswordInput.value;
+      const confirmPw = confirmPasswordInput.value;
+      const hint = passwordHintInput.value;
+      if (!newPw || newPw.length < 4) {
+        changePasswordError.textContent = 'Password must be at least 4 characters.';
+        changePasswordError.style.display = 'block';
+        return;
+      }
+      if (newPw !== confirmPw) {
+        changePasswordError.textContent = 'Passwords do not match.';
+        changePasswordError.style.display = 'block';
+        return;
+      }
+      setStoredPassword(newPw, hint);
+      PASSWORD = newPw;
+      changePasswordModal.style.display = 'none';
+      alert('Password changed!');
+    };
+    async function fetchBackupVideos() {
+      const res = await fetch('http://localhost:3000/backup-videos');
+      const videos = await res.json();
+      const list = document.getElementById('videoList');
+      list.innerHTML = '';
+      if (!videos.length) {
+        list.innerHTML = '<p>No backup video messages.</p>';
+        return;
+      }
+      videos.forEach(filename => {
+        const div = document.createElement('div');
+        div.className = 'video-item';
+        div.innerHTML = `
+          <video src="http://localhost:3000/backup/${filename}" controls></video>
+          <div class="filename">${filename}</div>
+          <a href="http://localhost:3000/backup/${filename}" download>Download</a>
+        `;
+        list.appendChild(div);
+      });
+    }
+    fetchBackupVideos();
+  </script>
+</body>
+</html>

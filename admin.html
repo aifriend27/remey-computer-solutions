@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Video Inbox</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .video-list { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 32px; }
+    .video-item { background: #101828; border-radius: 12px; box-shadow: 0 2px 16px #00aaff44; padding: 18px; width: 340px; }
+    .video-item video { width: 100%; border-radius: 8px; }
+    .video-item button { margin-top: 10px; width: 100%; }
+    .backup-link { color: #ff003c; font-size: 0.95rem; margin-top: 24px; display: block; }
+  </style>
+</head>
+<body>
+  <h1 style="color:var(--hud-blue);text-align:center;margin-top:32px;">Admin Video Inbox</h1>
+  <div style="max-width:700px;margin:0 auto 24px auto;padding:18px 24px;background:#101828;border-radius:12px;box-shadow:0 2px 16px #00aaff44;color:#fff;">
+    <h2 style="color:#00aaff;">Admin Features</h2>
+    <ul style="font-size:1.08em;line-height:1.7;">
+      <li>View and delete video messages</li>
+      <li>Upload, delete, and update (replace) public gallery images</li>
+      <li>Change website name/branding</li>
+      <li>Change admin password and password hint</li>
+      <li>View backup inbox (owner only)</li>
+    </ul>
+  </div>
+  <div id="videoList" class="video-list"></div>
+  <a class="backup-link" href="/backup-videos.html" target="_blank">View Backup (Owner Only)</a>
+
+  <!-- Admin Gallery Management Section -->
+  <section id="galleryAdminSection" style="display:none;margin:40px auto 0 auto;max-width:900px;">
+    <h2 style="color:#00aaff;text-align:center;">Gallery Management</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;">
+      <div style="flex:1;min-width:260px;max-width:340px;background:#101828;padding:18px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;">
+        <h3 style="color:#fff;">Upload Image to Gallery</h3>
+        <input type="file" id="galleryImageInput" accept="image/*" style="margin-bottom:12px;" />
+        <button id="uploadGalleryImageBtn" style="width:100%;padding:8px 0;background:#00aaff;color:#fff;border:none;border-radius:6px;font-size:1.1em;">Upload</button>
+        <div id="galleryUploadStatus" style="margin-top:10px;color:#fff;"></div>
+      </div>
+      <div style="flex:2;min-width:320px;max-width:500px;background:#101828;padding:18px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;">
+        <h3 style="color:#fff;">Delete Gallery Images</h3>
+        <div id="adminGalleryImages" style="display:flex;flex-wrap:wrap;gap:12px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Admin Branding Section -->
+  <section id="brandingAdminSection" style="display:none;margin:40px auto 0 auto;max-width:500px;background:#101828;padding:18px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;">
+    <h2 style="color:#00aaff;text-align:center;">Change Website Name</h2>
+    <input id="brandingInput" type="text" placeholder="New Website Name" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;" />
+    <button id="saveBrandingBtn" style="margin-top:12px;width:100%;padding:8px 0;background:#00aaff;color:#fff;border:none;border-radius:6px;font-size:1.1em;">Save</button>
+    <div id="brandingStatus" style="margin-top:10px;color:#fff;"></div>
+  </section>
+
+  <div id="passwordModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;">
+    <div style="background:#222;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;text-align:center;">
+      <h2 style="color:#fff;">Admin Access</h2>
+      <input id="adminPasswordInput" type="password" placeholder="Enter password" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;" />
+      <button id="adminPasswordBtn" style="margin-left:12px;padding:8px 18px;border-radius:6px;background:#00aaff;color:#fff;border:none;font-size:1.1em;">Enter</button>
+      <div id="adminPasswordError" style="color:#ff003c;margin-top:12px;display:none;">Wrong password. Try again.</div>
+      <div style="margin-top:16px;">
+        <a href="#" id="forgotPasswordLink" style="color:#00aaff;text-decoration:underline;font-size:0.98em;">Forgot Password?</a>
+      </div>
+    </div>
+  </div>
+  <div id="forgotPasswordModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:10000;align-items:center;justify-content:center;">
+    <div style="background:#222;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;text-align:center;max-width:350px;margin:auto;">
+      <h2 style="color:#fff;">Password Hint</h2>
+      <div id="passwordHintText" style="color:#fff;margin:16px 0;">Your hint: <b id='hintValue'></b></div>
+      <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="padding:8px 18px;border-radius:6px;background:#00aaff;color:#fff;border:none;font-size:1.1em;">Close</button>
+    </div>
+  </div>
+  <div id="changePasswordModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:10000;align-items:center;justify-content:center;">
+    <div style="background:#222;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;text-align:center;max-width:350px;margin:auto;">
+      <h2 style="color:#fff;">Change Password</h2>
+      <input id="newPasswordInput" type="password" placeholder="New password" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;margin-bottom:8px;" /><br>
+      <input id="confirmPasswordInput" type="password" placeholder="Confirm new password" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;" /><br>
+      <input id="passwordHintInput" type="text" placeholder="Password hint (optional)" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;margin-top:8px;" /><br>
+      <button id="savePasswordBtn" style="margin-top:12px;padding:8px 18px;border-radius:6px;background:#00aaff;color:#fff;border:none;font-size:1.1em;">Save</button>
+      <div id="changePasswordError" style="color:#ff003c;margin-top:12px;display:none;"></div>
+      <button onclick="document.getElementById('changePasswordModal').style.display='none'" style="margin-top:12px;padding:8px 18px;border-radius:6px;background:#333;color:#fff;border:none;font-size:1.1em;">Cancel</button>
+    </div>
+  </div>
+  <button id="changePasswordBtn" style="display:none;position:fixed;top:16px;right:16px;z-index:100;">Change Password</button>
+  <script>
+    async function fetchVideos() {
+      const res = await fetch('http://localhost:3000/videos');
+      const videos = await res.json();
+      const list = document.getElementById('videoList');
+      list.innerHTML = '';
+      if (!videos.length) {
+        list.innerHTML = '<p>No video messages yet.</p>';
+        return;
+      }
+      videos.forEach(filename => {
+        const div = document.createElement('div');
+        div.className = 'video-item';
+        div.innerHTML = `
+          <video src="http://localhost:3000/uploads/${filename}" controls></video>
+          <div style="margin-top:8px;word-break:break-all;">${filename}</div>
+          <button onclick="deleteVideo('${filename}', this)">Delete</button>
+        `;
+        list.appendChild(div);
+      });
+    }
+    async function deleteVideo(filename, btn) {
+      if (!confirm('Delete this video? It will be moved to backup.')) return;
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+      const res = await fetch(`http://localhost:3000/delete/${filename}`, { method: 'POST' });
+      if (res.ok) {
+        btn.parentElement.remove();
+      } else {
+        alert('Failed to delete video.');
+        btn.disabled = false;
+        btn.textContent = 'Delete';
+      }
+    }
+    fetchVideos();
+
+    // Password protection logic with localStorage
+    function getStoredPassword() {
+      return localStorage.getItem('remay_admin_pw') || 'remayadmin2024';
+    }
+    function getStoredHint() {
+      return localStorage.getItem('remay_admin_hint') || 'Default: remayadmin2024';
+    }
+    function setStoredPassword(pw, hint) {
+      localStorage.setItem('remay_admin_pw', pw);
+      if (hint !== undefined) localStorage.setItem('remay_admin_hint', hint);
+    }
+    let PASSWORD = getStoredPassword();
+    const passwordModal = document.getElementById('passwordModal');
+    const adminPasswordInput = document.getElementById('adminPasswordInput');
+    const adminPasswordBtn = document.getElementById('adminPasswordBtn');
+    const adminPasswordError = document.getElementById('adminPasswordError');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    const passwordHintText = document.getElementById('passwordHintText');
+    const hintValue = document.getElementById('hintValue');
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const changePasswordModal = document.getElementById('changePasswordModal');
+    const newPasswordInput = document.getElementById('newPasswordInput');
+    const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+    const passwordHintInput = document.getElementById('passwordHintInput');
+    const savePasswordBtn = document.getElementById('savePasswordBtn');
+    const changePasswordError = document.getElementById('changePasswordError');
+    function unlockAdminPage() {
+      passwordModal.style.display = 'none';
+      document.body.style.overflow = '';
+      changePasswordBtn.style.display = 'block';
+      // Show admin sections
+      document.getElementById('galleryAdminSection').style.display = 'block';
+      document.getElementById('brandingAdminSection').style.display = 'block';
+      fetchAdminGalleryImages();
+      loadBranding();
+    }
+
+    // Gallery image upload
+    document.getElementById('uploadGalleryImageBtn').onclick = async function() {
+      const fileInput = document.getElementById('galleryImageInput');
+      const status = document.getElementById('galleryUploadStatus');
+      if (!fileInput.files[0]) {
+        status.textContent = 'Please select an image.';
+        status.style.color = '#ff003c';
+        return;
+      }
+      const formData = new FormData();
+      formData.append('image', fileInput.files[0]);
+      status.textContent = 'Uploading...';
+      status.style.color = '#fff';
+      try {
+        const res = await fetch('http://localhost:3000/admin-upload-image', {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          status.textContent = 'Image uploaded!';
+          status.style.color = '#00ff99';
+          fileInput.value = '';
+          fetchAdminGalleryImages();
+        } else {
+          status.textContent = 'Upload failed.';
+          status.style.color = '#ff003c';
+        }
+      } catch (e) {
+        status.textContent = 'Error uploading.';
+        status.style.color = '#ff003c';
+      }
+    };
+
+    // Fetch and display gallery images for admin (with delete buttons)
+    async function fetchAdminGalleryImages() {
+      const container = document.getElementById('adminGalleryImages');
+      container.innerHTML = 'Loading...';
+      try {
+        const res = await fetch('http://localhost:3000/gallery-images');
+        const images = await res.json();
+        if (!images.length) {
+          container.innerHTML = '<p style="color:#fff;">No gallery images yet.</p>';
+          return;
+        }
+        container.innerHTML = '';
+        images.forEach(filename => {
+          const div = document.createElement('div');
+          div.style = 'position:relative;display:inline-block;';
+          div.innerHTML = `
+            <img src="http://localhost:3000/images/${filename}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:2px solid #00aaff;" />
+            <button style="position:absolute;top:2px;right:2px;background:#ff003c;color:#fff;border:none;border-radius:50%;width:24px;height:24px;font-size:1.1em;cursor:pointer;" onclick="deleteGalleryImage('${filename}', this)">&times;</button>
+            <input type="file" accept="image/*" style="position:absolute;bottom:2px;left:2px;width:24px;height:24px;opacity:0;cursor:pointer;" title="Update image" onchange="updateGalleryImage('${filename}', this)" />
+            <button style="position:absolute;bottom:2px;left:2px;background:#00aaff;color:#fff;border:none;border-radius:50%;width:24px;height:24px;font-size:1.1em;cursor:pointer;z-index:2;" onclick="this.previousElementSibling.click()">&#8635;</button>
+          `;
+          container.appendChild(div);
+        });
+      } catch (e) {
+        container.innerHTML = '<p style="color:#ff003c;">Failed to load images.</p>';
+      }
+    }
+
+    // Delete gallery image
+    window.deleteGalleryImage = async function(filename, btn) {
+      if (!confirm('Delete this image from gallery?')) return;
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        const res = await fetch(`http://localhost:3000/delete-gallery-image/${filename}`, { method: 'POST' });
+        if (res.ok) {
+          btn.parentElement.remove();
+        } else {
+          alert('Failed to delete image.');
+          btn.disabled = false;
+          btn.textContent = '×';
+        }
+      } catch (e) {
+        alert('Error deleting image.');
+        btn.disabled = false;
+        btn.textContent = '×';
+      }
+    };
+
+    // Add updateGalleryImage function
+    window.updateGalleryImage = async function(filename, input) {
+      if (!input.files[0]) return;
+      if (!confirm('Replace this image in the gallery?')) { input.value = ''; return; }
+      const formData = new FormData();
+      formData.append('image', input.files[0]);
+      try {
+        const res = await fetch(`http://localhost:3000/update-gallery-image/${filename}`, {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          fetchAdminGalleryImages();
+        } else {
+          alert('Failed to update image.');
+        }
+      } catch (e) {
+        alert('Error updating image.');
+      }
+      input.value = '';
+    };
+
+    // Branding (website name) management
+    function loadBranding() {
+      const branding = localStorage.getItem('remay_branding') || 'REMAY COMPUTER Solutions';
+      document.getElementById('brandingInput').value = branding;
+    }
+    document.getElementById('saveBrandingBtn').onclick = function() {
+      const val = document.getElementById('brandingInput').value.trim();
+      const status = document.getElementById('brandingStatus');
+      if (!val) {
+        status.textContent = 'Website name cannot be empty.';
+        status.style.color = '#ff003c';
+        return;
+      }
+      localStorage.setItem('remay_branding', val);
+      status.textContent = 'Website name updated!';
+      status.style.color = '#00ff99';
+      // Optionally, update branding on main site via postMessage or similar
+    };
+
+    adminPasswordBtn.onclick = function() {
+      PASSWORD = getStoredPassword();
+      if (adminPasswordInput.value === PASSWORD) {
+        unlockAdminPage();
+      } else {
+        adminPasswordError.style.display = 'block';
+        adminPasswordInput.value = '';
+      }
+    };
+    adminPasswordInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') adminPasswordBtn.click();
+    });
+    // Prevent scrolling and interaction until unlocked
+    document.body.style.overflow = 'hidden';
+    // Forgot password logic
+    forgotPasswordLink.onclick = function(e) {
+      e.preventDefault();
+      hintValue.textContent = getStoredHint();
+      forgotPasswordModal.style.display = 'flex';
+    };
+    // Change password logic
+    changePasswordBtn.onclick = function() {
+      newPasswordInput.value = '';
+      confirmPasswordInput.value = '';
+      passwordHintInput.value = getStoredHint();
+      changePasswordError.style.display = 'none';
+      changePasswordModal.style.display = 'flex';
+    };
+    savePasswordBtn.onclick = function() {
+      const newPw = newPasswordInput.value;
+      const confirmPw = confirmPasswordInput.value;
+      const hint = passwordHintInput.value;
+      if (!newPw || newPw.length < 4) {
+        changePasswordError.textContent = 'Password must be at least 4 characters.';
+        changePasswordError.style.display = 'block';
+        return;
+      }
+      if (newPw !== confirmPw) {
+        changePasswordError.textContent = 'Passwords do not match.';
+        changePasswordError.style.display = 'block';
+        return;
+      }
+      setStoredPassword(newPw, hint);
+      PASSWORD = newPw;
+      changePasswordModal.style.display = 'none';
+      alert('Password changed!');
+    };
+  </script>
+</body>
+</html>

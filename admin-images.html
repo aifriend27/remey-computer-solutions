@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - Image Inbox</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Admin - Image Inbox</h1>
+  <div id="imageList">Loading images...</div>
+  <div id="passwordModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;">
+    <div style="background:#222;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;text-align:center;">
+      <h2 style="color:#fff;">Admin Access</h2>
+      <input id="adminPasswordInput" type="password" placeholder="Enter password" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;" />
+      <button id="adminPasswordBtn" style="margin-left:12px;padding:8px 18px;border-radius:6px;background:#00aaff;color:#fff;border:none;font-size:1.1em;">Enter</button>
+      <div id="adminPasswordError" style="color:#ff003c;margin-top:12px;display:none;">Wrong password. Try again.</div>
+      <div style="margin-top:16px;">
+        <a href="#" id="forgotPasswordLink" style="color:#00aaff;text-decoration:underline;font-size:0.98em;">Forgot Password?</a>
+      </div>
+    </div>
+  </div>
+  <div id="forgotPasswordModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:10000;align-items:center;justify-content:center;">
+    <div style="background:#222;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;text-align:center;max-width:350px;margin:auto;">
+      <h2 style="color:#fff;">Password Hint</h2>
+      <div id="passwordHintText" style="color:#fff;margin:16px 0;">Your hint: <b id='hintValue'></b></div>
+      <button onclick="document.getElementById('forgotPasswordModal').style.display='none'" style="padding:8px 18px;border-radius:6px;background:#00aaff;color:#fff;border:none;font-size:1.1em;">Close</button>
+    </div>
+  </div>
+  <div id="changePasswordModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:10000;align-items:center;justify-content:center;">
+    <div style="background:#222;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;text-align:center;max-width:350px;margin:auto;">
+      <h2 style="color:#fff;">Change Password</h2>
+      <input id="newPasswordInput" type="password" placeholder="New password" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;margin-bottom:8px;" /><br>
+      <input id="confirmPasswordInput" type="password" placeholder="Confirm new password" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;" /><br>
+      <input id="passwordHintInput" type="text" placeholder="Password hint (optional)" style="padding:8px 12px;border-radius:6px;border:1px solid #333;font-size:1.1em;margin-top:8px;" /><br>
+      <button id="savePasswordBtn" style="margin-top:12px;padding:8px 18px;border-radius:6px;background:#00aaff;color:#fff;border:none;font-size:1.1em;">Save</button>
+      <div id="changePasswordError" style="color:#ff003c;margin-top:12px;display:none;"></div>
+      <button onclick="document.getElementById('changePasswordModal').style.display='none'" style="margin-top:12px;padding:8px 18px;border-radius:6px;background:#333;color:#fff;border:none;font-size:1.1em;">Cancel</button>
+    </div>
+  </div>
+  <button id="changePasswordBtn" style="display:none;position:fixed;top:16px;right:16px;z-index:100;">Change Password</button>
+  <script>
+    async function loadImages() {
+      const res = await fetch('/images');
+      const images = await res.json();
+      const list = document.getElementById('imageList');
+      if (!images.length) {
+        list.innerHTML = '<p>No images found.</p>';
+        return;
+      }
+      list.innerHTML = '';
+      images.forEach(filename => {
+        const div = document.createElement('div');
+        div.className = 'admin-image-row';
+        div.innerHTML = `
+          <img src="/images/${filename}" style="max-width:120px;max-height:80px;vertical-align:middle;border-radius:6px;" />
+          <span style="margin-left:12px;">${filename}</span>
+          <button onclick="deleteImage('${filename}')">Delete</button>
+          <a href="/images/${filename}" download style="margin-left:8px;">Download</a>
+        `;
+        list.appendChild(div);
+      });
+    }
+    async function deleteImage(filename) {
+      if (!confirm('Delete this image? (It will be moved to backup)')) return;
+      const res = await fetch(`/delete-image/${filename}`, { method: 'POST' });
+      if (res.ok) {
+        alert('Image moved to backup.');
+        loadImages();
+      } else {
+        alert('Failed to delete image.');
+      }
+    }
+    // Password protection logic with localStorage
+    function getStoredPassword() {
+      return localStorage.getItem('remay_admin_pw') || 'remayadmin2024';
+    }
+    function getStoredHint() {
+      return localStorage.getItem('remay_admin_hint') || 'Default: remayadmin2024';
+    }
+    function setStoredPassword(pw, hint) {
+      localStorage.setItem('remay_admin_pw', pw);
+      if (hint !== undefined) localStorage.setItem('remay_admin_hint', hint);
+    }
+    let PASSWORD = getStoredPassword();
+    const passwordModal = document.getElementById('passwordModal');
+    const adminPasswordInput = document.getElementById('adminPasswordInput');
+    const adminPasswordBtn = document.getElementById('adminPasswordBtn');
+    const adminPasswordError = document.getElementById('adminPasswordError');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    const passwordHintText = document.getElementById('passwordHintText');
+    const hintValue = document.getElementById('hintValue');
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const changePasswordModal = document.getElementById('changePasswordModal');
+    const newPasswordInput = document.getElementById('newPasswordInput');
+    const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+    const passwordHintInput = document.getElementById('passwordHintInput');
+    const savePasswordBtn = document.getElementById('savePasswordBtn');
+    const changePasswordError = document.getElementById('changePasswordError');
+    function unlockAdminPage() {
+      passwordModal.style.display = 'none';
+      document.body.style.overflow = '';
+      changePasswordBtn.style.display = 'block';
+    }
+    adminPasswordBtn.onclick = function() {
+      PASSWORD = getStoredPassword();
+      if (adminPasswordInput.value === PASSWORD) {
+        unlockAdminPage();
+      } else {
+        adminPasswordError.style.display = 'block';
+        adminPasswordInput.value = '';
+      }
+    };
+    adminPasswordInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') adminPasswordBtn.click();
+    });
+    // Prevent scrolling and interaction until unlocked
+    document.body.style.overflow = 'hidden';
+    // Forgot password logic
+    forgotPasswordLink.onclick = function(e) {
+      e.preventDefault();
+      hintValue.textContent = getStoredHint();
+      forgotPasswordModal.style.display = 'flex';
+    };
+    // Change password logic
+    changePasswordBtn.onclick = function() {
+      newPasswordInput.value = '';
+      confirmPasswordInput.value = '';
+      passwordHintInput.value = getStoredHint();
+      changePasswordError.style.display = 'none';
+      changePasswordModal.style.display = 'flex';
+    };
+    savePasswordBtn.onclick = function() {
+      const newPw = newPasswordInput.value;
+      const confirmPw = confirmPasswordInput.value;
+      const hint = passwordHintInput.value;
+      if (!newPw || newPw.length < 4) {
+        changePasswordError.textContent = 'Password must be at least 4 characters.';
+        changePasswordError.style.display = 'block';
+        return;
+      }
+      if (newPw !== confirmPw) {
+        changePasswordError.textContent = 'Passwords do not match.';
+        changePasswordError.style.display = 'block';
+        return;
+      }
+      setStoredPassword(newPw, hint);
+      PASSWORD = newPw;
+      changePasswordModal.style.display = 'none';
+      alert('Password changed!');
+    };
+    loadImages();
+  </script>
+</body>
+</html>
