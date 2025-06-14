@@ -268,12 +268,11 @@ body::after {
 
 /* Remove mirror effect from video feed */
 #videoFeed, video.hud-modal-video, .hud-modal video, video {
-  transform: none !important;
-  -webkit-transform: none !important;
-  -moz-transform: none !important;
-  -ms-transform: none !important;
-  -o-transform: none !important;
-  scale: 1 !important;
+  transform: scaleX(1) !important;
+  -webkit-transform: scaleX(1) !important;
+  -moz-transform: scaleX(1) !important;
+  -ms-transform: scaleX(1) !important;
+  -o-transform: scaleX(1) !important;
   image-orientation: from-image !important;
   direction: ltr !important;
   filter: none !important;
@@ -931,4 +930,61 @@ img {
     font-size: 0.9rem !important;
     padding: 2px 6px !important;
   }
+}
+
+/* --- PERFORMANCE & WHATSAPP-STYLE IMAGE IMPROVEMENTS --- */
+
+@media (max-width: 900px) {
+  /* Disable scanline animation and reduce background effects for smoother scrolling */
+  body::before {
+    animation: none !important;
+    opacity: 0.15 !important;
+  }
+  body::after {
+    opacity: 0.2 !important;
+  }
+  /* Reduce box-shadow for cards and modals */
+  .service-card,
+  .contact-card,
+  .voicemail-card,
+  .image-card,
+  .hud-modal,
+  .modal-content,
+  #videoCallContainer {
+    box-shadow: 0 2px 8px var(--hud-blue) !important;
+  }
+}
+
+/* WhatsApp-style image display for galleries/modals */
+.gallery-image, .modal-image, .image-card img, .gallery img {
+  display: block;
+  max-width: 90vw !important;
+  max-height: 60vh !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 12px auto !important;
+  border-radius: 18px !important;
+  box-shadow: 0 2px 12px #0004 !important;
+  background: #222 !important;
+  object-fit: cover !important;
+}
+
+@media (max-width: 600px) {
+  .gallery-image, .modal-image, .image-card img, .gallery img {
+    max-width: 98vw !important;
+    max-height: 50vh !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* Ensure all video elements are not mirrored */
+video, #videoFeed, video.hud-modal-video, .hud-modal video {
+  transform: scaleX(1) !important;
+  -webkit-transform: scaleX(1) !important;
+  -moz-transform: scaleX(1) !important;
+  -ms-transform: scaleX(1) !important;
+  -o-transform: scaleX(1) !important;
+  image-orientation: from-image !important;
+  direction: ltr !important;
+  filter: none !important;
 }
