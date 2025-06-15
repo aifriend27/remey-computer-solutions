@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Backup Video Messages (Owner Only)</title>
+  <title>Admin Access</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    .video-list { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 32px; }
-    .video-item { background: #101828; border-radius: 12px; box-shadow: 0 2px 16px #00aaff44; padding: 18px; width: 340px; }
-    .video-item video { width: 100%; border-radius: 8px; }
-    .video-item .filename { margin-top: 8px; word-break: break-all; color: #ff003c; }
+    /* Add any additional styles here */
   </style>
 </head>
 <body>
@@ -43,8 +40,7 @@
     </div>
   </div>
   <button id="changePasswordBtn" style="display:none;position:fixed;top:16px;right:16px;z-index:100;">Change Password</button>
-  <h1 style="color:var(--hud-red);text-align:center;margin-top:32px;">Backup Video Messages (Owner Only)</h1>
-  <div id="videoList" class="video-list"></div>
+  <h1 style="color:var(--hud-red);text-align:center;margin-top:32px;">Admin Access</h1>
   <script>
     // Password protection logic with localStorage
     function getStoredPassword() {
@@ -125,27 +121,6 @@
       changePasswordModal.style.display = 'none';
       alert('Password changed!');
     };
-    async function fetchBackupVideos() {
-      const res = await fetch('http://localhost:3000/backup-videos');
-      const videos = await res.json();
-      const list = document.getElementById('videoList');
-      list.innerHTML = '';
-      if (!videos.length) {
-        list.innerHTML = '<p>No backup video messages.</p>';
-        return;
-      }
-      videos.forEach(filename => {
-        const div = document.createElement('div');
-        div.className = 'video-item';
-        div.innerHTML = `
-          <video src="http://localhost:3000/backup/${filename}" controls></video>
-          <div class="filename">${filename}</div>
-          <a href="http://localhost:3000/backup/${filename}" download>Download</a>
-        `;
-        list.appendChild(div);
-      });
-    }
-    fetchBackupVideos();
   </script>
 </body>
 </html>

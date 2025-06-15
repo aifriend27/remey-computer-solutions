@@ -68,35 +68,8 @@
             <a href="mailto:remaycomputersolutions@gmail.com" class="contact-modern-btn email">Email</a>
           </div>
         </div>
-        <div class="voicemail-card">
-          <h3>Send a Video Message</h3>
-          <p>Can't call right now? Record and send us a video message and our team will get back to you fast.</p>
-          <button class="contact-modern-btn record" id="openVoicemailModal">Record Video Message</button>
-        </div>
-        <div class="image-card">
-          <h3>Send an Image</h3>
-          <p>Share a photo of your device or issue for a faster, more accurate quote.</p>
-          <button class="contact-modern-btn image" id="openImageModal">Send Image</button>
-        </div>
       </div>
     </section>
-  </div>
-  <div id="hudOverlay" style="display:none;"></div>
-
-  <!-- Floating Voicemail Playback (hidden by default) -->
-  <div id="floatingVoicemailBox" class="hud-modal" style="display:none;">
-    <video id="floatingVoicemailPlayback" controls class="hud-modal-video"></video>
-    <button id="sendFloatingVoicemail" class="hud-modal-btn">Send Video</button>
-  </div>
-  <!-- Dim overlay for sending -->
-  <div id="sendingOverlay" class="hud-modal-overlay" style="display:none;"></div>
-
-  <!-- Group Video Call HUD Grid -->
-  <div id="groupCallContainer" class="hud-modal" style="display:none;">
-    <div id="groupGrid" class="hud-modal-grid">
-      <!-- Video tiles will be injected here -->
-    </div>
-    <button onclick="closeGroupCall()" class="hud-modal-close">×</button>
   </div>
 
   <section class="services">
@@ -148,27 +121,6 @@
     <h2 id="contactSelectTitle">Choose Contact</h2>
     <div id="contactSelectList"></div>
     <button onclick="closeContactSelectModal()" class="hud-modal-close">×</button>
-  </div>
-
-  <!-- Video Message Modal -->
-  <div id="voicemailModal" class="hud-modal" style="display:none;">
-    <h2>Record Video Message</h2>
-    <video id="voicemailPreview" autoplay muted playsinline style="width:100%;max-width:400px;display:none;"></video>
-    <div style="margin-top:16px;">
-      <button id="startVoicemailRecord" class="hud-modal-btn">Start Recording</button>
-      <button id="stopVoicemailRecord" class="hud-modal-btn" style="display:none;">Stop Recording</button>
-      <button id="sendVoicemail" class="hud-modal-btn" style="display:none;">Send Video</button>
-      <button onclick="closeVoicemailModal()" class="hud-modal-close">×</button>
-    </div>
-  </div>
-
-  <!-- Image Modal for Upload/Camera -->
-  <div id="imageModal" class="hud-modal" style="display:none;">
-    <h2>Send an Image</h2>
-    <input id="imageInput" type="file" accept="image/*" capture="environment" style="margin:16px 0;" />
-    <img id="imagePreview" src="" style="display:none;max-width:100%;margin-bottom:12px;border-radius:8px;" />
-    <button id="imageSendMsg" class="hud-modal-btn" style="display:none;">Send Image</button>
-    <button onclick="closeImageModal()" class="hud-modal-close">×</button>
   </div>
 
   <!-- Service Details Modal -->

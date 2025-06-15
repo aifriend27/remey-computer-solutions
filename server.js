@@ -1,4 +1,4 @@
-// Simple Node.js/Express backend for video message uploads
+// Simple Node.js/Express backend for image gallery management
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
@@ -36,18 +36,6 @@ if (!fs.existsSync(backupImagesDir)) {
   fs.mkdirSync(backupImagesDir);
 }
 
-// Multer setup for video uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'video-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-const upload = multer({ storage: storage });
-
 // Multer setup for image uploads
 const imageStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -67,27 +55,6 @@ const transporter = nodemailer.createTransport({
     user: 'ashbelzichri@gmail.com', // your secret email
     pass: 'YOUR_APP_PASSWORD' // use an app password, not your real password
   }
-});
-
-// Upload endpoint
-app.post('/upload', upload.single('video'), (req, res) => {
-  if (!req.file) return res.status(400).send('No file uploaded.');
-  // Send email notification to owner
-  const mailOptions = {
-    from: 'ashbelzichri@gmail.com',
-    to: 'ashbelzichri@gmail.com',
-    subject: 'New Video Message Received',
-    text: `A new video message was uploaded: ${req.file.filename}`,
-    html: `<p>A new video message was uploaded: <b>${req.file.filename}</b></p><p><a href="http://localhost:3000/uploads/${req.file.filename}">View Video</a></p>`
-  };
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error('Email notification failed:', error);
-    } else {
-      console.log('Email sent:', info.response);
-    }
-  });
-  res.json({ success: true, filename: req.file.filename });
 });
 
 // Image upload endpoint
@@ -147,32 +114,12 @@ app.get('/gallery-images', (req, res) => {
   });
 });
 
-// List all uploaded videos
-app.get('/videos', (req, res) => {
-  fs.readdir(uploadDir, (err, files) => {
-    if (err) return res.status(500).json({ error: 'Failed to list videos.' });
-    const videoFiles = files.filter(f => f.endsWith('.webm') || f.endsWith('.mp4'));
-    res.json(videoFiles);
-  });
-});
-
 // List all uploaded images
 app.get('/images', (req, res) => {
   fs.readdir(imagesDir, (err, files) => {
     if (err) return res.status(500).json({ error: 'Failed to list images.' });
     const imageFiles = files.filter(f => f.match(/\.(jpg|jpeg|png|gif|webp)$/i));
     res.json(imageFiles);
-  });
-});
-
-// Soft delete endpoint (move to backup)
-app.post('/delete/:filename', (req, res) => {
-  const filename = req.params.filename;
-  const srcPath = path.join(uploadDir, filename);
-  const destPath = path.join(backupDir, filename);
-  fs.rename(srcPath, destPath, (err) => {
-    if (err) return res.status(500).json({ error: 'Failed to delete (move) video.' });
-    res.json({ success: true });
   });
 });
 
@@ -187,15 +134,6 @@ app.post('/delete-image/:filename', (req, res) => {
   });
 });
 
-// List all backed up videos (owner only, secret route)
-app.get('/backup-videos', (req, res) => {
-  fs.readdir(backupDir, (err, files) => {
-    if (err) return res.status(500).json({ error: 'Failed to list backup videos.' });
-    const videoFiles = files.filter(f => f.endsWith('.webm') || f.endsWith('.mp4'));
-    res.json(videoFiles);
-  });
-});
-
 // List all backed up images (owner only, secret route)
 app.get('/backup-images', (req, res) => {
   fs.readdir(backupImagesDir, (err, files) => {
@@ -205,18 +143,12 @@ app.get('/backup-images', (req, res) => {
   });
 });
 
-// Serve uploaded videos statically from /uploads
-app.use('/uploads', express.static(uploadDir));
-
 // Serve uploaded images statically from /images
 app.use('/images', express.static(imagesDir));
-
-// Serve backup videos statically (owner only, secret route)
-app.use('/backup', express.static(backupDir));
 
 // Serve backup images statically (owner only, secret route)
 app.use('/backup-images', express.static(backupImagesDir));
 
 app.listen(PORT, () => {
-  console.log(`Video message server running at http://localhost:${PORT}`);
+  console.log(`Image gallery server running at http://localhost:${PORT}`);
 });

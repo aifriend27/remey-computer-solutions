@@ -94,14 +94,18 @@
     }
     function setStoredPassword(pw, hint) {
       localStorage.setItem('remay_admin_pw', pw);
-      if (hint !== undefined) localStorage.setItem('remay_admin_hint', hint);
+      if (hint) localStorage.setItem('remay_admin_hint', hint);
     }
     document.getElementById('adminPasswordBtn').onclick = () => {
       const password = document.getElementById('adminPasswordInput').value;
-      const storedPassword = getStoredPassword();
-      if (password === storedPassword) {
+      const hint = getStoredHint();
+      if (password === '') {
+        document.getElementById('adminPasswordError').innerText = 'Password cannot be empty.';
+        document.getElementById('adminPasswordError').style.display = 'block';
+        return;
+      }
+      if (password === getStoredPassword()) {
         document.getElementById('passwordModal').style.display = 'none';
-        document.getElementById('changePasswordBtn').style.display = 'block';
         loadImages();
       } else {
         document.getElementById('adminPasswordError').style.display = 'block';
@@ -116,19 +120,30 @@
       const newPassword = document.getElementById('newPasswordInput').value;
       const confirmPassword = document.getElementById('confirmPasswordInput').value;
       const passwordHint = document.getElementById('passwordHintInput').value;
+      if (newPassword === '' || confirmPassword === '') {
+        document.getElementById('changePasswordError').innerText = 'Password and confirmation cannot be empty.';
+        document.getElementById('changePasswordError').style.display = 'block';
+        return;
+      }
       if (newPassword !== confirmPassword) {
         document.getElementById('changePasswordError').innerText = 'Passwords do not match.';
         document.getElementById('changePasswordError').style.display = 'block';
         return;
       }
       setStoredPassword(newPassword, passwordHint);
-      alert('Password changed successfully!');
-      document.getElementById('changePasswordModal').style.display = 'none';
+      alert('Password changed successfully. Please log in again.');
+      location.reload();
     };
-    document.getElementById('changePasswordBtn').onclick = () => {
-      document.getElementById('changePasswordModal').style.display = 'flex';
+    window.onload = () => {
+      if (location.pathname === '/admin') {
+        const password = getStoredPassword();
+        if (password !== 'remayadmin2024') {
+          document.getElementById('passwordModal').style.display = 'flex';
+        } else {
+          loadImages();
+        }
+      }
     };
-    loadImages();
   </script>
 </body>
 </html>

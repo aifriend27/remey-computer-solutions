@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Video Inbox</title>
+  <title>Admin Gallery Management</title>
   <link rel="stylesheet" href="style.css" />
   <style>
     .video-list { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 32px; }
@@ -14,11 +14,10 @@
   </style>
 </head>
 <body>
-  <h1 style="color:var(--hud-blue);text-align:center;margin-top:32px;">Admin Video Inbox</h1>
+  <h1 style="color:var(--hud-blue);text-align:center;margin-top:32px;">Admin Gallery Management</h1>
   <div style="max-width:700px;margin:0 auto 24px auto;padding:18px 24px;background:#101828;border-radius:12px;box-shadow:0 2px 16px #00aaff44;color:#fff;">
     <h2 style="color:#00aaff;">Admin Features</h2>
     <ul style="font-size:1.08em;line-height:1.7;">
-      <li>View and delete video messages</li>
       <li>Upload, delete, and update (replace) public gallery images</li>
       <li>Change website name/branding</li>
       <li>Change admin password and password hint</li>
@@ -84,41 +83,6 @@
   </div>
   <button id="changePasswordBtn" style="display:none;position:fixed;top:16px;right:16px;z-index:100;">Change Password</button>
   <script>
-    async function fetchVideos() {
-      const res = await fetch('http://localhost:3000/videos');
-      const videos = await res.json();
-      const list = document.getElementById('videoList');
-      list.innerHTML = '';
-      if (!videos.length) {
-        list.innerHTML = '<p>No video messages yet.</p>';
-        return;
-      }
-      videos.forEach(filename => {
-        const div = document.createElement('div');
-        div.className = 'video-item';
-        div.innerHTML = `
-          <video src="http://localhost:3000/uploads/${filename}" controls></video>
-          <div style="margin-top:8px;word-break:break-all;">${filename}</div>
-          <button onclick="deleteVideo('${filename}', this)">Delete</button>
-        `;
-        list.appendChild(div);
-      });
-    }
-    async function deleteVideo(filename, btn) {
-      if (!confirm('Delete this video? It will be moved to backup.')) return;
-      btn.disabled = true;
-      btn.textContent = 'Deleting...';
-      const res = await fetch(`http://localhost:3000/delete/${filename}`, { method: 'POST' });
-      if (res.ok) {
-        btn.parentElement.remove();
-      } else {
-        alert('Failed to delete video.');
-        btn.disabled = false;
-        btn.textContent = 'Delete';
-      }
-    }
-    fetchVideos();
-
     // Password protection logic with localStorage
     function getStoredPassword() {
       return localStorage.getItem('remay_admin_pw') || 'remayadmin2024';
