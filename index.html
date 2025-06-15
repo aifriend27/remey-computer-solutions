@@ -50,9 +50,7 @@
         <h1 class="hero-title">REMAY COMPUTER Solutions</h1>
         <p class="hero-subtitle">Expert Repair & Tech Services in Nairobi</p>
         <div class="hero-actions">
-          <button class="hero-btn primary" id="videoCallBtn">
-            <span id="hudText">Start Video Call</span><span id="typewriterCursor" style="display:none;">|</span>
-          </button>
+          <!-- Video call button removed -->
         </div>
       </div>
     </section>
@@ -116,131 +114,14 @@
 
   <div id="hudPopupRoot"></div>
 
-  <!-- Contact Selection Modal -->
-  <div id="contactSelectModal" class="hud-modal" style="display:none;z-index:1000;">
-    <h2 id="contactSelectTitle">Choose Contact</h2>
-    <div id="contactSelectList"></div>
-    <button onclick="closeContactSelectModal()" class="hud-modal-close">×</button>
-  </div>
-
   <!-- Service Details Modal -->
   <div id="serviceDetailsModal" class="hud-modal" style="display:none;z-index:2000;max-width:420px;margin:auto;">
     <div id="serviceDetailsContent"></div>
     <button onclick="closeServiceDetailsModal()" class="hud-modal-close">×</button>
   </div>
 
-  <!-- Admin Image Upload Button (always visible for admin/testing) -->
-  <button id="adminUploadBtn" style="position:fixed;bottom:24px;right:24px;z-index:3000;background:#00aaff;color:#fff;border:none;border-radius:50%;width:56px;height:56px;font-size:2em;box-shadow:0 2px 8px #0005;cursor:pointer;">+</button>
   <script>
-  // --- Make admin upload button always visible ---
-  document.getElementById('adminUploadBtn').style.display = 'block';
-  </script>
-
-  <!-- Admin Image Upload Modal -->
-  <div id="adminUploadModal" class="hud-modal" style="display:none;z-index:4000;max-width:340px;margin:auto;">
-    <h2>Admin: Upload Gallery Image</h2>
-    <input id="adminImageInput" type="file" accept="image/*" style="margin:16px 0;" />
-    <img id="adminImagePreview" src="" style="display:none;max-width:100%;margin-bottom:12px;border-radius:8px;" />
-    <button id="adminImageSend" class="hud-modal-btn" style="display:none;">Upload Image</button>
-    <button onclick="closeAdminUploadModal()" class="hud-modal-close">×</button>
-  </div>
-
-  <!-- Public Gallery Section -->
-  <section class="gallery-section" id="publicGallery">
-    <h2 class="services-title">Gallery</h2>
-    <div id="galleryGrid" class="services-grid"></div>
-  </section>
-
-  <script>
-    // --- Admin Upload Button Logic (Always visible, password required every time) ---
-    (function() {
-      const adminUploadBtn = document.getElementById('adminUploadBtn');
-      const adminUploadModal = document.getElementById('adminUploadModal');
-      const adminImageInput = document.getElementById('adminImageInput');
-      const adminImagePreview = document.getElementById('adminImagePreview');
-      const adminImageSend = document.getElementById('adminImageSend');
-      let adminImageFile = null;
-
-      // Always show the button
-      adminUploadBtn.style.display = 'block';
-
-      adminUploadBtn.onclick = function() {
-        const key = prompt('Admin: Enter gallery upload password');
-        if (key === 'REMAY2025') {
-          adminUploadModal.style.display = 'block';
-          adminImageInput.value = '';
-          adminImagePreview.style.display = 'none';
-          adminImageSend.style.display = 'none';
-        } else if (key !== null) {
-          alert('Incorrect password.');
-        }
-      };
-      adminImageInput.onchange = function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          adminImageFile = file;
-          const reader = new FileReader();
-          reader.onload = function(ev) {
-            adminImagePreview.src = ev.target.result;
-            adminImagePreview.style.display = 'block';
-            adminImageSend.style.display = '';
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-      adminImageSend.onclick = async function() {
-        if (!adminImageFile) return;
-        adminImageSend.disabled = true;
-        adminImageSend.textContent = 'Uploading...';
-        const formData = new FormData();
-        formData.append('image', adminImageFile);
-        try {
-          const response = await fetch('http://localhost:3000/admin-upload-image', {
-            method: 'POST',
-            body: formData
-          });
-          if (!response.ok) throw new Error('Upload failed');
-          adminImageSend.textContent = 'Uploaded!';
-          alert('Image uploaded to gallery!');
-          closeAdminUploadModal();
-          loadGalleryImages();
-        } catch (err) {
-          alert('Failed to upload image.');
-          adminImageSend.disabled = false;
-          adminImageSend.textContent = 'Upload Image';
-        }
-      };
-      window.closeAdminUploadModal = function() {
-        adminUploadModal.style.display = 'none';
-        adminImagePreview.src = '';
-        adminImagePreview.style.display = 'none';
-        adminImageSend.style.display = 'none';
-        adminImageSend.disabled = false;
-        adminImageSend.textContent = 'Upload Image';
-        adminImageFile = null;
-      };
-    })();
-
-    // --- Public Gallery Display Logic ---
-    async function loadGalleryImages() {
-      try {
-        const res = await fetch('http://localhost:3000/gallery-images');
-        if (!res.ok) throw new Error('Failed to load gallery');
-        const images = await res.json();
-        const grid = document.getElementById('galleryGrid');
-        grid.innerHTML = '';
-        images.forEach(img => {
-          const div = document.createElement('div');
-          div.className = 'service-card';
-          div.innerHTML = `<img src="http://localhost:3000/images/${encodeURIComponent(img)}" alt="Gallery Image" style="width:100%;border-radius:12px;box-shadow:0 2px 8px #0002;max-height:180px;object-fit:cover;" />`;
-          grid.appendChild(div);
-        });
-      } catch (e) {
-        document.getElementById('galleryGrid').innerHTML = '<div style="color:#888;">No gallery images yet.</div>';
-      }
-    }
-    loadGalleryImages();
-
+    // Only keep HUD popup and contact modal logic, remove all video, gallery, image, and backup logic
     document.addEventListener('DOMContentLoaded', function() {
       // --- Click Sound Logic ---
       window.playClickSound = window.playClickSound || function() {
@@ -270,273 +151,7 @@
         });
       }
       attachClickSoundToButtons();
-      // If dynamic buttons are added, re-attach after modals open
       document.addEventListener('DOMNodeInserted', attachClickSoundToButtons);
-
-      // --- Ensure required functions exist ---
-      window.playHqRingtone = window.playHqRingtone || function() {
-        try {
-          if (!window._hqRingtone) {
-            window._hqRingtone = new Audio('sounds/calling.wav');
-            window._hqRingtone.loop = true;
-          }
-          window._hqRingtone.currentTime = 0;
-          window._hqRingtone.play();
-          console.log('Ringtone playing');
-        } catch (e) { console.error('playHqRingtone error', e); }
-      };
-      window.stopHqRingtone = window.stopHqRingtone || function() {
-        try {
-          if (window._hqRingtone) { window._hqRingtone.pause(); window._hqRingtone.currentTime = 0; }
-          console.log('Ringtone stopped');
-        } catch (e) { console.error('stopHqRingtone error', e); }
-      };
-      window.playVideoCallOpeningSound = window.playVideoCallOpeningSound || function() {
-        try {
-          let audio = new Audio('sounds/scif-fi-Video call opening-mp3.wav');
-          audio.play();
-          console.log('Video call opening sound played');
-        } catch (e) { console.error('playVideoCallOpeningSound error', e); }
-      };
-      window.closeVideoCall = window.closeVideoCall || function() {
-        try {
-          const videoCallContainer = document.getElementById('videoCallContainer');
-          if (videoCallContainer) videoCallContainer.style.display = 'none';
-          const video = document.getElementById('videoFeed');
-          if (video) video.srcObject = null;
-          document.getElementById('videoCallBtn').style.display = '';
-          console.log('Video call closed');
-        } catch (e) { console.error('closeVideoCall error', e); }
-      };
-      window.activateHudMode = window.activateHudMode || function() { console.log('HUD mode activated'); };
-
-      // --- Ensure video call container and video element exist ---
-      if (!document.getElementById('videoCallContainer')) {
-        const container = document.createElement('div');
-        container.id = 'videoCallContainer';
-        container.className = 'hud-modal';
-        container.style.display = 'none';
-        container.innerHTML = '<video id="videoFeed" autoplay playsinline style="width:100%;height:auto;display:none;"></video><button onclick="closeVideoCall()" class="hud-modal-close">×</button>';
-        document.body.appendChild(container);
-        console.log('Injected videoCallContainer into DOM');
-      }
-
-      // --- Video Call Button Logic ---
-      const videoCallBtn = document.getElementById('videoCallBtn');
-      if (videoCallBtn) {
-        console.log('Video Call Button handler attached');
-        videoCallBtn.onclick = async function() {
-          console.log('Video Call Button clicked');
-          playHqRingtone();
-          let videoStream = null;
-          try {
-            videoStream = await navigator.mediaDevices.getUserMedia({
-              video: { width: { ideal: 800 }, height: { ideal: 320 }, facingMode: 'user' },
-              audio: true
-            });
-            console.log('Camera/mic permission granted, stream ready');
-            stopHqRingtone();
-            playVideoCallOpeningSound();
-            const videoCallContainer = document.getElementById('videoCallContainer');
-            videoCallContainer.classList.remove('fade-in');
-            void videoCallContainer.offsetWidth;
-            videoCallContainer.classList.add('fade-in');
-            videoCallBtn.style.display = 'none';
-            videoCallContainer.style.display = 'flex';
-            const video = document.getElementById('videoFeed');
-            video.srcObject = videoStream;
-            video.style.display = 'block';
-            video.style.transform = 'scaleX(1)'; // Force no mirror, even for front camera
-            // --- Add custom HUD frame styling ---
-            video.classList.add('hud-video-frame');
-            // Optionally, wrap the video in a styled HUD frame container
-            let hudFrame = document.getElementById('hudVideoFrameContainer');
-            if (!hudFrame) {
-              hudFrame = document.createElement('div');
-              hudFrame.id = 'hudVideoFrameContainer';
-              hudFrame.className = 'hud-frame-container';
-              video.parentNode.insertBefore(hudFrame, video);
-              hudFrame.appendChild(video);
-            }
-            await video.play();
-            console.log('Video feed started');
-          } catch (err) {
-            stopHqRingtone();
-            alert('Could not access webcam or microphone: ' + err);
-            closeVideoCall();
-            console.error('getUserMedia error', err);
-          }
-          activateHudMode();
-        };
-      } else {
-        console.error('Video Call Button not found in DOM');
-      }
-
-      // --- Other DOM-dependent logic ---
-      const bottomButton = document.querySelector('.bottom-button');
-      if (bottomButton) {
-        bottomButton.onclick = function() {
-          document.getElementById('contactModal').style.display = 'block';
-        };
-      }
-      window.onclick = function(event) {
-        var modal = document.getElementById('contactModal');
-        if (event.target == modal) {
-          modal.style.display = 'none';
-        }
-      };
-
-      // --- Video Recording Button Logic ---
-      const recordVoicemailBtn = document.getElementById('openVoicemailModal');
-      const voicemailModal = document.getElementById('voicemailModal');
-      const voicemailPreview = document.getElementById('voicemailPreview');
-      const startVoicemailRecord = document.getElementById('startVoicemailRecord');
-      const stopVoicemailRecord = document.getElementById('stopVoicemailRecord');
-      const sendVoicemail = document.getElementById('sendVoicemail');
-      let voicemailStream = null;
-      let voicemailRecorder = null;
-      let voicemailChunks = [];
-
-      if (recordVoicemailBtn) {
-        recordVoicemailBtn.onclick = function() {
-          voicemailModal.style.display = 'block';
-          startVoicemailRecord.style.display = '';
-          stopVoicemailRecord.style.display = 'none';
-          sendVoicemail.style.display = 'none';
-          voicemailPreview.controls = false;
-          voicemailPreview.src = '';
-          navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-            voicemailStream = stream;
-            voicemailPreview.srcObject = stream;
-            voicemailPreview.style.display = 'block';
-          }).catch(err => {
-            alert('Could not access camera/mic: ' + err);
-          });
-        };
-      }
-      if (startVoicemailRecord) {
-        startVoicemailRecord.onclick = function() {
-          voicemailChunks = [];
-          voicemailRecorder = new MediaRecorder(voicemailStream);
-          voicemailRecorder.ondataavailable = e => voicemailChunks.push(e.data);
-          voicemailRecorder.onstop = function() {
-            const blob = new Blob(voicemailChunks, { type: 'video/webm' });
-            voicemailPreview.srcObject = null;
-            voicemailPreview.src = URL.createObjectURL(blob);
-            voicemailPreview.controls = true;
-            sendVoicemail.style.display = '';
-          };
-          voicemailRecorder.start();
-          startVoicemailRecord.style.display = 'none';
-          stopVoicemailRecord.style.display = '';
-        };
-      }
-      if (stopVoicemailRecord) {
-        stopVoicemailRecord.onclick = function() {
-          if (voicemailRecorder && voicemailRecorder.state === 'recording') {
-            voicemailRecorder.stop();
-            stopVoicemailRecord.style.display = 'none';
-          }
-        };
-      }
-      if (sendVoicemail) {
-        sendVoicemail.onclick = async function() {
-          const blob = new Blob(voicemailChunks, { type: 'video/webm' });
-          const formData = new FormData();
-          formData.append('video', blob, 'video-message.webm');
-          sendVoicemail.disabled = true;
-          sendVoicemail.textContent = 'Uploading...';
-          try {
-            const response = await fetch('http://localhost:3000/upload', {
-              method: 'POST',
-              body: formData
-            });
-            if (!response.ok) throw new Error('Upload failed');
-            sendVoicemail.textContent = 'Sent!';
-            alert('Your video message has been sent!');
-            closeVoicemailModal();
-          } catch (err) {
-            alert('Failed to send video message. Please try again.');
-            sendVoicemail.disabled = false;
-            sendVoicemail.textContent = 'Send Video';
-          }
-        };
-      }
-      window.closeVoicemailModal = function() {
-        voicemailModal.style.display = 'none';
-        if (voicemailStream) {
-          voicemailStream.getTracks().forEach(track => track.stop());
-          voicemailStream = null;
-        }
-        voicemailPreview.srcObject = null;
-        voicemailPreview.src = '';
-        voicemailPreview.controls = false;
-        if (startVoicemailRecord) startVoicemailRecord.style.display = '';
-        if (stopVoicemailRecord) stopVoicemailRecord.style.display = 'none';
-        if (sendVoicemail) sendVoicemail.style.display = 'none';
-      };
-
-      const imageModal = document.getElementById('imageModal');
-      const imageInput = document.getElementById('imageInput');
-      const imagePreview = document.getElementById('imagePreview');
-      const imageSendMsg = document.getElementById('imageSendMsg');
-      const openImageModalBtn = document.getElementById('openImageModal');
-      if (openImageModalBtn) {
-        openImageModalBtn.onclick = function() {
-          imageModal.style.display = 'block';
-          imagePreview.style.display = 'none';
-          imageInput.value = '';
-          imageSendMsg.style.display = 'none';
-        };
-      }
-      if (imageInput) {
-        imageInput.onchange = function(e) {
-          const file = e.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-              imagePreview.src = ev.target.result;
-              imagePreview.style.display = 'block';
-              imageSendMsg.style.display = '';
-            };
-            reader.readAsDataURL(file);
-          }
-        };
-      }
-      if (imageSendMsg) {
-        imageSendMsg.onclick = async function() {
-          const file = imageInput.files[0];
-          if (!file) return;
-          imageSendMsg.disabled = true;
-          imageSendMsg.textContent = 'Uploading...';
-          const formData = new FormData();
-          formData.append('image', file);
-          try {
-            // You need to implement /upload-image endpoint in your backend
-            const response = await fetch('http://localhost:3000/upload-image', {
-              method: 'POST',
-              body: formData
-            });
-            if (!response.ok) throw new Error('Upload failed');
-            imageSendMsg.textContent = 'Sent!';
-            alert('Your image has been sent!');
-            closeImageModal();
-          } catch (err) {
-            alert('Failed to send image. Please try again.');
-            imageSendMsg.disabled = false;
-            imageSendMsg.textContent = 'Send Image';
-          }
-        };
-      }
-      function closeImageModal() {
-        imageModal.style.display = 'none';
-        imagePreview.src = '';
-        imagePreview.style.display = 'none';
-        imageSendMsg.style.display = 'none';
-        imageSendMsg.disabled = false;
-        imageSendMsg.textContent = 'Send Image';
-      }
-      window.closeImageModal = closeImageModal;
 
       // --- Contact Selection Modal Logic ---
       const contactOptions = [
@@ -572,7 +187,6 @@
         contactSelectModal.style.display = 'none';
       }
       window.closeContactSelectModal = closeContactSelectModal;
-      // --- Override Call/WhatsApp Buttons ---
       document.querySelectorAll('.contact-modern-btn.call').forEach(btn => {
         btn.onclick = function(e) {
           e.preventDefault();
@@ -715,7 +329,6 @@
         document.getElementById('serviceDetailsModal').style.display = 'none';
       }
       window.closeServiceDetailsModal = closeServiceDetailsModal;
-      // Attach to all Learn More buttons
       document.querySelectorAll('.service-btn').forEach(btn => {
         btn.onclick = function() {
           const card = btn.closest('.service-card');
@@ -727,16 +340,13 @@
       // --- Disable heavy graphics on small screens for mobile performance ---
       function adjustForMobilePerformance() {
         if (window.innerWidth < 600) {
-          // Hide matrix rain
           var matrixRain = document.getElementById('matrixRain');
           if (matrixRain) matrixRain.style.display = 'none';
-          // Hide or reduce animated backgrounds
           var glassBg = document.querySelector('.glass-bg');
           if (glassBg) glassBg.style.display = 'none';
           var infinityRgb = document.querySelector('.infinity-rgb');
           if (infinityRgb) infinityRgb.style.display = 'none';
         } else {
-          // Show them on desktop
           var matrixRain = document.getElementById('matrixRain');
           if (matrixRain) matrixRain.style.display = '';
           var glassBg = document.querySelector('.glass-bg');
@@ -750,17 +360,13 @@
     });
   </script>
 
-  <!-- Force all video elements to never be mirrored, even if JS or inline style tries to mirror them -->
-  <script>
-    setInterval(() => {
-      document.querySelectorAll('video').forEach(v => {
-        v.style.transform = 'none';
-        v.style.webkitTransform = 'none';
-      });
-    }, 500);
-  </script>
+  <!-- Contact Selection Modal -->
+  <div id="contactSelectModal" class="hud-modal" style="display:none;z-index:1000;">
+    <h2 id="contactSelectTitle">Choose Contact</h2>
+    <div id="contactSelectList"></div>
+    <button onclick="closeContactSelectModal()" class="hud-modal-close">×</button>
+  </div>
 
-  <!-- Modern Footer -->
   <footer class="site-footer">
     <div class="footer-content">
       <div class="footer-section business-info">
