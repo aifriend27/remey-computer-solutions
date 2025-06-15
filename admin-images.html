@@ -8,7 +8,9 @@
 </head>
 <body>
   <h1>Admin - Image Inbox</h1>
+  <div style="color:#ff003c;font-size:1em;margin-bottom:12px;">Tip: For best performance, upload compressed images (JPG/WebP, under 500KB).</div>
   <div id="imageList">Loading images...</div>
+  <div id="loadMoreContainer" style="text-align:center;margin:18px 0;"></div>
   <div id="passwordModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;">
     <div style="background:#222;padding:32px 24px;border-radius:12px;box-shadow:0 2px 16px #00aaff44;text-align:center;">
       <h2 style="color:#fff;">Admin Access</h2>
@@ -40,26 +42,38 @@
   </div>
   <button id="changePasswordBtn" style="display:none;position:fixed;top:16px;right:16px;z-index:100;">Change Password</button>
   <script>
-    async function loadImages() {
+    async function loadImages(page = 1, perPage = 10) {
       const res = await fetch('/images');
       const images = await res.json();
       const list = document.getElementById('imageList');
+      const loadMoreContainer = document.getElementById('loadMoreContainer');
       if (!images.length) {
         list.innerHTML = '<p>No images found.</p>';
+        loadMoreContainer.innerHTML = '';
         return;
       }
       list.innerHTML = '';
-      images.forEach(filename => {
+      const start = (page - 1) * perPage;
+      const end = start + perPage;
+      const pageImages = images.slice(start, end);
+      pageImages.forEach(filename => {
         const div = document.createElement('div');
         div.className = 'admin-image-row';
         div.innerHTML = `
-          <img src="/images/${filename}" style="max-width:120px;max-height:80px;vertical-align:middle;border-radius:6px;" />
+          <img src="/images/${filename}" loading="lazy" style="max-width:120px;max-height:80px;vertical-align:middle;border-radius:6px;" />
           <span style="margin-left:12px;">${filename}</span>
           <button onclick="deleteImage('${filename}')">Delete</button>
           <a href="/images/${filename}" download style="margin-left:8px;">Download</a>
         `;
         list.appendChild(div);
       });
+      // Load More logic
+      if (end < images.length) {
+        loadMoreContainer.innerHTML = `<button id='loadMoreBtn' style='margin-top:12px;padding:8px 18px;border-radius:6px;background:#00aaff;color:#fff;border:none;font-size:1.1em;'>Load More</button>`;
+        document.getElementById('loadMoreBtn').onclick = () => loadImages(page + 1, perPage);
+      } else {
+        loadMoreContainer.innerHTML = '';
+      }
     }
     async function deleteImage(filename) {
       if (!confirm('Delete this image? (It will be moved to backup)')) return;
@@ -82,73 +96,37 @@
       localStorage.setItem('remay_admin_pw', pw);
       if (hint !== undefined) localStorage.setItem('remay_admin_hint', hint);
     }
-    let PASSWORD = getStoredPassword();
-    const passwordModal = document.getElementById('passwordModal');
-    const adminPasswordInput = document.getElementById('adminPasswordInput');
-    const adminPasswordBtn = document.getElementById('adminPasswordBtn');
-    const adminPasswordError = document.getElementById('adminPasswordError');
-    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
-    const passwordHintText = document.getElementById('passwordHintText');
-    const hintValue = document.getElementById('hintValue');
-    const changePasswordBtn = document.getElementById('changePasswordBtn');
-    const changePasswordModal = document.getElementById('changePasswordModal');
-    const newPasswordInput = document.getElementById('newPasswordInput');
-    const confirmPasswordInput = document.getElementById('confirmPasswordInput');
-    const passwordHintInput = document.getElementById('passwordHintInput');
-    const savePasswordBtn = document.getElementById('savePasswordBtn');
-    const changePasswordError = document.getElementById('changePasswordError');
-    function unlockAdminPage() {
-      passwordModal.style.display = 'none';
-      document.body.style.overflow = '';
-      changePasswordBtn.style.display = 'block';
-    }
-    adminPasswordBtn.onclick = function() {
-      PASSWORD = getStoredPassword();
-      if (adminPasswordInput.value === PASSWORD) {
-        unlockAdminPage();
+    document.getElementById('adminPasswordBtn').onclick = () => {
+      const password = document.getElementById('adminPasswordInput').value;
+      const storedPassword = getStoredPassword();
+      if (password === storedPassword) {
+        document.getElementById('passwordModal').style.display = 'none';
+        document.getElementById('changePasswordBtn').style.display = 'block';
+        loadImages();
       } else {
-        adminPasswordError.style.display = 'block';
-        adminPasswordInput.value = '';
+        document.getElementById('adminPasswordError').style.display = 'block';
       }
     };
-    adminPasswordInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') adminPasswordBtn.click();
-    });
-    // Prevent scrolling and interaction until unlocked
-    document.body.style.overflow = 'hidden';
-    // Forgot password logic
-    forgotPasswordLink.onclick = function(e) {
-      e.preventDefault();
-      hintValue.textContent = getStoredHint();
-      forgotPasswordModal.style.display = 'flex';
+    document.getElementById('forgotPasswordLink').onclick = () => {
+      document.getElementById('passwordModal').style.display = 'none';
+      document.getElementById('forgotPasswordModal').style.display = 'flex';
+      document.getElementById('hintValue').innerText = getStoredHint();
     };
-    // Change password logic
-    changePasswordBtn.onclick = function() {
-      newPasswordInput.value = '';
-      confirmPasswordInput.value = '';
-      passwordHintInput.value = getStoredHint();
-      changePasswordError.style.display = 'none';
-      changePasswordModal.style.display = 'flex';
-    };
-    savePasswordBtn.onclick = function() {
-      const newPw = newPasswordInput.value;
-      const confirmPw = confirmPasswordInput.value;
-      const hint = passwordHintInput.value;
-      if (!newPw || newPw.length < 4) {
-        changePasswordError.textContent = 'Password must be at least 4 characters.';
-        changePasswordError.style.display = 'block';
+    document.getElementById('savePasswordBtn').onclick = () => {
+      const newPassword = document.getElementById('newPasswordInput').value;
+      const confirmPassword = document.getElementById('confirmPasswordInput').value;
+      const passwordHint = document.getElementById('passwordHintInput').value;
+      if (newPassword !== confirmPassword) {
+        document.getElementById('changePasswordError').innerText = 'Passwords do not match.';
+        document.getElementById('changePasswordError').style.display = 'block';
         return;
       }
-      if (newPw !== confirmPw) {
-        changePasswordError.textContent = 'Passwords do not match.';
-        changePasswordError.style.display = 'block';
-        return;
-      }
-      setStoredPassword(newPw, hint);
-      PASSWORD = newPw;
-      changePasswordModal.style.display = 'none';
-      alert('Password changed!');
+      setStoredPassword(newPassword, passwordHint);
+      alert('Password changed successfully!');
+      document.getElementById('changePasswordModal').style.display = 'none';
+    };
+    document.getElementById('changePasswordBtn').onclick = () => {
+      document.getElementById('changePasswordModal').style.display = 'flex';
     };
     loadImages();
   </script>
