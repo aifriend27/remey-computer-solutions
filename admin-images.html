@@ -76,10 +76,10 @@
       }
     }
     async function deleteImage(filename) {
-      if (!confirm('Delete this image? (It will be moved to backup)')) return;
+      if (!confirm('Delete this image?')) return;
       const res = await fetch(`/delete-image/${filename}`, { method: 'POST' });
       if (res.ok) {
-        alert('Image moved to backup.');
+        alert('Image deleted.');
         loadImages();
       } else {
         alert('Failed to delete image.');

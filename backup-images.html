@@ -126,27 +126,6 @@
       changePasswordModal.style.display = 'none';
       alert('Password changed!');
     };
-    async function fetchBackupImages() {
-      const res = await fetch('http://localhost:3000/backup-images');
-      const images = await res.json();
-      const list = document.getElementById('imageList');
-      list.innerHTML = '';
-      if (!images.length) {
-        list.innerHTML = '<p>No backup images.</p>';
-        return;
-      }
-      images.forEach(filename => {
-        const div = document.createElement('div');
-        div.className = 'image-item';
-        div.innerHTML = `
-          <img src="http://localhost:3000/backup-images/${filename}" alt="${filename}" />
-          <div class="filename">${filename}</div>
-          <a href="http://localhost:3000/backup-images/${filename}" download>Download</a>
-        `;
-        list.appendChild(div);
-      });
-    }
-    fetchBackupImages();
   </script>
 </body>
 </html>
