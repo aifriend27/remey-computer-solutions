@@ -107,8 +107,11 @@
 
   <div id="hudPopupRoot"></div>
 
+  <!-- Modal Overlay for professional popup effect -->
+  <div id="hudModalOverlay"></div>
+
   <!-- Service Details Modal -->
-  <div id="serviceDetailsModal" class="hud-modal" style="display:none;z-index:2000;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);max-width:95vw;width:100%;box-sizing:border-box;margin:0;padding:0;background:#222;border-radius:16px;box-shadow:0 4px 32px #000a;">
+  <div id="serviceDetailsModal" class="hud-modal">
     <div id="serviceDetailsContent" style="padding:24px 16px 16px 16px;"></div>
     <button onclick="closeServiceDetailsModal()" class="hud-modal-close" style="position:absolute;top:8px;right:12px;font-size:2em;background:none;border:none;color:#fff;cursor:pointer;">×</button>
   </div>
@@ -301,30 +304,60 @@
         }
       };
       function showHudPopup(service) {
-        const details = serviceDetails[service.title] || {};
-        let html = `<div style='text-align:center;font-size:2.2em;'>${details.icon || ''}</div>`;
+        // Map service title to contact info and pre-filled WhatsApp message
+        const contacts = {
+          'Phone Repair': {
+            phone: '+254705926066',
+            whatsapp: '+254705926066',
+            message: 'Hello, I need Phone Repair service.'
+          },
+          'Laptop Repair': {
+            phone: '+254786102736',
+            whatsapp: '+254786102736',
+            message: 'Hello, I need Laptop Repair service.'
+          },
+          'Key & Watch Repair': {
+            phone: '+254705222640',
+            whatsapp: '+254705222640',
+            message: 'Hello, I need Key & Watch Repair service.'
+          },
+          'Printer Repair': {
+            phone: '+254725016032',
+            whatsapp: '+254725016032',
+            message: 'Hello, I need Printer Repair service.'
+          },
+          'Accessories': {
+            phone: '+254725016032',
+            whatsapp: '+254725016032',
+            message: 'Hello, I need Accessories.'
+          },
+          'Our Location': {
+            phone: '+254725016032',
+            whatsapp: '+254725016032',
+            message: 'Hello, I need your location details.'
+          }
+        };
+        const c = contacts[service.title] || contacts['Phone Repair'];
+        let html = `<div style='text-align:center;font-size:2.2em;'>${serviceDetails[service.title]?.icon || ''}</div>`;
         html += `<h2 style='margin:8px 0 4px 0;'>${service.title}</h2>`;
-        html += `<div style='margin-bottom:10px;color:#00aaff;'>${details.description || ''}</div>`;
-        if (details.features && details.features.length) {
-          html += '<ul style="text-align:left;margin-bottom:10px;">';
-          details.features.forEach(f => html += `<li>${f}</li>`);
-          html += '</ul>';
-        }
-        if (details.contact) {
-          // Make Call/WhatsApp/Email direct links to HQ
-          html += `<div style='margin-top:12px;'>
-            <a href='tel:+254725016032' class='contact-modern-btn call' style='margin-right:8px;'>Call HQ</a>
-            <a href='https://wa.me/254725016032' class='contact-modern-btn whatsapp' style='margin-right:8px;' target='_blank'>WhatsApp HQ</a>
-            <a href='mailto:remaycomputersolutions@gmail.com' class='contact-modern-btn email'>Email HQ</a>
-          </div>`;
-        }
+        html += `<div style='margin-bottom:10px;color:#00aaff;'>${serviceDetails[service.title]?.description || ''}</div>`;
+        html += `<div style='margin-bottom:10px;'>Reach out for quick support, questions, or to book a service. We're here to help!</div>`;
+        html += `<div style='margin-top:12px;'>
+          <a href='https://wa.me/${c.whatsapp.replace('+','')}?text=${encodeURIComponent(c.message)}' class='contact-modern-btn whatsapp' style='margin-right:8px;' target='_blank'>WhatsApp Now</a>
+          <a href='tel:${c.phone}' class='contact-modern-btn call'>Call Now</a>
+        </div>`;
         document.getElementById('serviceDetailsContent').innerHTML = html;
-        document.getElementById('serviceDetailsModal').style.display = 'block';
+        document.getElementById('serviceDetailsModal').classList.add('active');
+        document.getElementById('hudModalOverlay').classList.add('active');
+        document.body.classList.add('modal-open');
       }
       function closeServiceDetailsModal() {
-        document.getElementById('serviceDetailsModal').style.display = 'none';
+        document.getElementById('serviceDetailsModal').classList.remove('active');
+        document.getElementById('hudModalOverlay').classList.remove('active');
+        document.body.classList.remove('modal-open');
       }
       window.closeServiceDetailsModal = closeServiceDetailsModal;
+      document.getElementById('hudModalOverlay').onclick = closeServiceDetailsModal;
 
       // --- Remove adjustForMobilePerformance and related event listeners ---
     });

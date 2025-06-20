@@ -609,15 +609,30 @@ body::before, body::after {
   }
 }
 
-/* Service Details Modal Responsive Fix */
+/* Modal Overlay for professional popup effect */
+#hudModalOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10,20,40,0.75);
+  z-index: 1999;
+  display: none;
+  transition: background 0.2s;
+}
+#hudModalOverlay.active {
+  display: block;
+}
+
 #serviceDetailsModal.hud-modal {
   position: fixed !important;
   top: 50% !important;
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
-  max-width: 95vw !important;
-  width: 100% !important;
+  max-width: 420px !important;
+  width: calc(100vw - 32px) !important;
   min-width: 0 !important;
+  max-height: calc(100vh - 32px) !important;
   box-sizing: border-box !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -625,32 +640,29 @@ body::before, body::after {
   border-radius: 16px !important;
   box-shadow: 0 4px 32px #000a !important;
   z-index: 2000 !important;
-  overflow: auto !important;
+  overflow: hidden !important;
+  display: none;
+}
+#serviceDetailsModal.hud-modal.active {
+  display: block;
 }
 #serviceDetailsContent {
-  padding: 24px 16px 16px 16px !important;
-  max-height: 70vh;
+  padding: 24px 20px 16px 20px !important;
+  max-height: calc(100vh - 100px);
   overflow-y: auto;
-}
-.hud-modal-close {
-  position: absolute !important;
-  top: 8px !important;
-  right: 12px !important;
-  font-size: 2em !important;
-  background: none !important;
-  border: none !important;
-  color: #fff !important;
-  cursor: pointer !important;
-  z-index: 2100 !important;
+  box-sizing: border-box;
 }
 @media (max-width: 600px) {
   #serviceDetailsModal.hud-modal {
     max-width: 98vw !important;
+    width: calc(100vw - 10px) !important;
     min-width: 0 !important;
     border-radius: 10px !important;
+    max-height: calc(100vh - 10px) !important;
   }
   #serviceDetailsContent {
-    padding: 16px 4vw 12px 4vw !important;
+    padding: 14px 4vw 10px 4vw !important;
     font-size: 1em !important;
+    max-height: calc(100vh - 60px);
   }
 }
