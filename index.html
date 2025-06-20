@@ -20,13 +20,6 @@
   </script>
 </head>
 <body>
-  <div class="glass-bg"></div>
-  <div class="infinity-rgb">
-    <div class="infinity-shape"></div>
-    <div class="infinity-shape2"></div>
-    <div class="infinity-shape3"></div>
-  </div>
-  <canvas id="matrixRain" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;display:none;"></canvas>
   <div class="header">
     <div class="business-name">Business Repair Services</div>
     <div class="social-icons">
@@ -115,9 +108,9 @@
   <div id="hudPopupRoot"></div>
 
   <!-- Service Details Modal -->
-  <div id="serviceDetailsModal" class="hud-modal" style="display:none;z-index:2000;max-width:420px;margin:auto;">
-    <div id="serviceDetailsContent"></div>
-    <button onclick="closeServiceDetailsModal()" class="hud-modal-close">×</button>
+  <div id="serviceDetailsModal" class="hud-modal" style="display:none;z-index:2000;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);max-width:95vw;width:100%;box-sizing:border-box;margin:0;padding:0;background:#222;border-radius:16px;box-shadow:0 4px 32px #000a;">
+    <div id="serviceDetailsContent" style="padding:24px 16px 16px 16px;"></div>
+    <button onclick="closeServiceDetailsModal()" class="hud-modal-close" style="position:absolute;top:8px;right:12px;font-size:2em;background:none;border:none;color:#fff;cursor:pointer;">×</button>
   </div>
 
   <script>
@@ -187,18 +180,20 @@
         contactSelectModal.style.display = 'none';
       }
       window.closeContactSelectModal = closeContactSelectModal;
-      document.querySelectorAll('.contact-modern-btn.call').forEach(btn => {
+      // Only attach modal logic to service popups, not main contact card
+      document.querySelectorAll('.services .contact-modern-btn.call').forEach(btn => {
         btn.onclick = function(e) {
           e.preventDefault();
           showContactSelectModal('call');
         };
       });
-      document.querySelectorAll('.contact-modern-btn.whatsapp').forEach(btn => {
+      document.querySelectorAll('.services .contact-modern-btn.whatsapp').forEach(btn => {
         btn.onclick = function(e) {
           e.preventDefault();
           showContactSelectModal('whatsapp');
         };
       });
+      // Remove modal logic from main contact card buttons (let them work as direct links)
 
       // Service details data
       const serviceDetails = {
@@ -316,10 +311,11 @@
           html += '</ul>';
         }
         if (details.contact) {
+          // Make Call/WhatsApp/Email direct links to HQ
           html += `<div style='margin-top:12px;'>
-            <a href='tel:${details.contact.phone}' class='contact-modern-btn call' style='margin-right:8px;'>Call</a>
-            <a href='https://wa.me/${details.contact.whatsapp.replace('+','')}' class='contact-modern-btn whatsapp' style='margin-right:8px;' target='_blank'>WhatsApp</a>
-            <a href='mailto:${details.contact.email}' class='contact-modern-btn email'>Email</a>
+            <a href='tel:+254725016032' class='contact-modern-btn call' style='margin-right:8px;'>Call HQ</a>
+            <a href='https://wa.me/254725016032' class='contact-modern-btn whatsapp' style='margin-right:8px;' target='_blank'>WhatsApp HQ</a>
+            <a href='mailto:remaycomputersolutions@gmail.com' class='contact-modern-btn email'>Email HQ</a>
           </div>`;
         }
         document.getElementById('serviceDetailsContent').innerHTML = html;
@@ -329,34 +325,8 @@
         document.getElementById('serviceDetailsModal').style.display = 'none';
       }
       window.closeServiceDetailsModal = closeServiceDetailsModal;
-      document.querySelectorAll('.service-btn').forEach(btn => {
-        btn.onclick = function() {
-          const card = btn.closest('.service-card');
-          const title = card ? card.querySelector('h3').textContent.trim() : btn.textContent.trim();
-          showHudPopup({ title });
-        };
-      });
 
-      // --- Disable heavy graphics on small screens for mobile performance ---
-      function adjustForMobilePerformance() {
-        if (window.innerWidth < 600) {
-          var matrixRain = document.getElementById('matrixRain');
-          if (matrixRain) matrixRain.style.display = 'none';
-          var glassBg = document.querySelector('.glass-bg');
-          if (glassBg) glassBg.style.display = 'none';
-          var infinityRgb = document.querySelector('.infinity-rgb');
-          if (infinityRgb) infinityRgb.style.display = 'none';
-        } else {
-          var matrixRain = document.getElementById('matrixRain');
-          if (matrixRain) matrixRain.style.display = '';
-          var glassBg = document.querySelector('.glass-bg');
-          if (glassBg) glassBg.style.display = '';
-          var infinityRgb = document.querySelector('.infinity-rgb');
-          if (infinityRgb) infinityRgb.style.display = '';
-        }
-      }
-      window.addEventListener('resize', adjustForMobilePerformance);
-      adjustForMobilePerformance();
+      // --- Remove adjustForMobilePerformance and related event listeners ---
     });
   </script>
 

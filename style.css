@@ -18,11 +18,9 @@ html, body {
 }
 
 body {
-  font-family: 'Orbitron', 'Rajdhani', Arial, sans-serif;
-  background: linear-gradient(135deg, var(--hud-black) 0%, #181c2b 100%) fixed;
-  color: var(--hud-white);
-  overflow-x: hidden;
-  overflow-y: auto;
+  font-family: Arial, sans-serif;
+  background: #181c2b;
+  color: #fff;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -32,52 +30,70 @@ body {
   position: relative;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  left: 0; top: 0; width: 100vw; height: 100vh;
-  pointer-events: none;
-  z-index: 1;
-  background: repeating-linear-gradient(
-    to bottom, rgba(0,255,0,0.07) 0 2px, transparent 2px 8px
-  );
-  opacity: 0.5;
-  animation: scanlines 2s linear infinite;
+/* Remove heavy background overlays and scanlines */
+body::before, body::after {
+  display: none !important;
 }
 
-body::after {
-  content: '';
-  position: fixed;
-  left: 0; top: 0; width: 100vw; height: 100vh;
-  pointer-events: none;
-  z-index: 2;
-  background: radial-gradient(ellipse at center, rgba(0,170,255,0.10) 0%, rgba(0,0,0,0.7) 100%);
-  mix-blend-mode: lighten;
+/* Make cards and grid ultra-light for smooth scrolling */
+.service-card, .contact-card {
+  background: #222 !important;
+  border-radius: 8px !important;
+  border: 1px solid #222 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transition: none !important;
+  padding: 18px 8px 12px 8px !important;
+  margin: 0 !important;
+}
+.services-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  margin: 0 auto !important;
+  box-shadow: none !important;
+  background: none !important;
 }
 
-@keyframes scanlines {
-  0% { background-position-y: 0; }
-  100% { background-position-y: 8px; }
+/* Remove hover effects for mobile performance */
+.service-card:hover, .contact-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: #222 !important;
 }
 
-/* HERO SECTION */
-.hero {
-  width: 100%;
-  min-height: 60vh;
+/* Remove or reduce box-shadow and filter for cards */
+.service-card, .contact-card {
+  background: #222;
+  border-radius: 12px;
+  border: 1px solid #00aaff;
+  padding: 24px 12px 18px 12px;
+  text-align: center;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(120deg, var(--hud-black) 60%, var(--hud-blue) 100%);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  padding: 64px 0 48px 0;
-  position: relative;
-  z-index: 2;
+  box-shadow: none;
+  filter: none;
+  transition: none;
+}
+.service-card:hover, .contact-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: #00aaff;
+}
+
+/* Remove background gradients from hero and services */
+.hero {
+  background: #181c2b;
+  box-shadow: none;
 }
 .hero-content {
-  background: rgba(10,20,40,0.92);
-  border-radius: 24px;
-  box-shadow: 0 8px 32px var(--hud-blue), var(--hud-glow-blue);
-  padding: 48px 32px 40px 32px;
+  background: #222;
+  border-radius: 16px;
+  box-shadow: none;
+  padding: 32px 16px 24px 16px;
   max-width: 480px;
   width: 100%;
   text-align: center;
@@ -385,30 +401,32 @@ body::after {
   text-shadow: 0 2px 12px var(--hud-blue);
 }
 .services-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 32px;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  margin: 0 auto !important;
+  box-shadow: none !important;
+  background: none !important;
 }
 .service-card {
-  background: rgba(10,20,40,0.98);
-  border-radius: 18px;
-  box-shadow: 0 4px 24px var(--hud-blue), var(--hud-glow-blue);
-  border: 2px solid var(--hud-blue);
-  padding: 32px 24px 28px 24px;
+  background: #222;
+  border-radius: 12px;
+  border: 1px solid #00aaff;
+  padding: 24px 12px 18px 12px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: transform 0.18s, box-shadow 0.18s;
-  filter: drop-shadow(0 0 8px var(--hud-blue)) drop-shadow(0 0 2px var(--hud-red));
+  box-shadow: none;
+  filter: none;
+  transition: none;
 }
 .service-card:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 8px 32px var(--hud-blue), 0 0 32px var(--hud-red);
-  border-color: var(--hud-red);
+  transform: none;
+  box-shadow: none;
+  border-color: #00aaff;
 }
 .service-icon {
   font-size: 2.5rem;
@@ -493,22 +511,22 @@ body::after {
   margin: 0 auto;
 }
 .contact-card {
-  background: rgba(10,20,40,0.98);
-  border-radius: 18px;
-  box-shadow: 0 4px 24px var(--hud-blue), var(--hud-glow-blue);
-  border: 2px solid var(--hud-blue);
-  padding: 32px 24px 28px 24px;
+  background: #222;
+  border-radius: 12px;
+  border: 1px solid #00aaff;
+  padding: 24px 12px 18px 12px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: transform 0.18s, box-shadow 0.18s;
-  filter: drop-shadow(0 0 8px var(--hud-blue)) drop-shadow(0 0 2px var(--hud-red));
+  box-shadow: none;
+  filter: none;
+  transition: none;
 }
 .contact-card:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 8px 32px var(--hud-red), 0 0 32px var(--hud-blue);
-  border-color: var(--hud-red);
+  transform: none;
+  box-shadow: none;
+  border-color: #00aaff;
 }
 .contact-card h3 {
   color: var(--hud-blue);
@@ -588,5 +606,51 @@ body::after {
   }
   .contact-card {
     padding: 14px 2vw 10px 2vw;
+  }
+}
+
+/* Service Details Modal Responsive Fix */
+#serviceDetailsModal.hud-modal {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-width: 95vw !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #222 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 32px #000a !important;
+  z-index: 2000 !important;
+  overflow: auto !important;
+}
+#serviceDetailsContent {
+  padding: 24px 16px 16px 16px !important;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.hud-modal-close {
+  position: absolute !important;
+  top: 8px !important;
+  right: 12px !important;
+  font-size: 2em !important;
+  background: none !important;
+  border: none !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  z-index: 2100 !important;
+}
+@media (max-width: 600px) {
+  #serviceDetailsModal.hud-modal {
+    max-width: 98vw !important;
+    min-width: 0 !important;
+    border-radius: 10px !important;
+  }
+  #serviceDetailsContent {
+    padding: 16px 4vw 12px 4vw !important;
+    font-size: 1em !important;
   }
 }
